@@ -84,13 +84,11 @@ def parse_config():
         nargs=argparse.REMAINDER,
         help="set extra config keys if needed",
     )
-
     parser.add_argument(
         "--max_waiting_mins", type=int, default=0, help="max waiting minutes"
     )
     parser.add_argument("--start_epoch", type=int, default=0, help="")
     parser.add_argument("--save_to_file", action="store_true", default=False, help="")
-
     parser.add_argument(
         "--num_folds",
         type=int,
