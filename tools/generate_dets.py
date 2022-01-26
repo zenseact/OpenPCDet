@@ -1,4 +1,3 @@
-import _init_path
 import argparse
 import datetime
 import glob
@@ -10,14 +9,16 @@ from pathlib import Path
 import numpy as np
 import torch
 import tqdm
-from tensorboardX import SummaryWriter
-
-from eval_utils import eval_utils
-from pcdet.config import cfg, cfg_from_list, cfg_from_yaml_file, log_config_to_file
+from pcdet.config import (cfg, cfg_from_list, cfg_from_yaml_file,
+                          log_config_to_file)
 from pcdet.datasets import build_dataloader
 from pcdet.models import build_network
 from pcdet.utils import common_utils
-from eval_utils.eval_utils import statistics_info, load_data_to_gpu
+from tensorboardX import SummaryWriter
+
+import _init_path
+from eval_utils import eval_utils
+from eval_utils.eval_utils import load_data_to_gpu, statistics_info
 
 
 def parse_config():
@@ -167,10 +168,11 @@ def main():
         with open(os.path.join(_dir, f"{frame_id}.txt"), "w") as file:
             for lab, score, box in zip(labels, confs, boxes):
                 length, width, height = box[3:6]
+                # ISO x,y,z,rot
                 x, y, z = box[0:3]
                 rot = box[-1]
-                # TODO maybe change this.
-                file.write(f"{cfg.CLASS_NAMES[lab-1]} 0 0 0 -1 -1 -1 -1 {height} {width} {length} {x} {y} {z} {rot} {score}\n")
+                # Save almost KITTI style. Use Zenseact coordinate system (x right, y, forward, z up)
+                file.write(f"{cfg.CLASS_NAMES[lab-1]} 0 0 0 -1 -1 -1 -1 {height} {width} {length} {-y} {x} {z} {rot-np.pi/2} {score}\n")
 
     logger.info('Result is save to %s' % final_output_dir)
     logger.info('****************Evaluation done.*****************')

@@ -91,6 +91,19 @@ def parse_config():
     parser.add_argument("--start_epoch", type=int, default=0, help="")
     parser.add_argument("--save_to_file", action="store_true", default=False, help="")
 
+    parser.add_argument(
+        "--num_folds",
+        type=int,
+        default=3,
+        help="number of folds to use for train/val split",
+    )
+    parser.add_argument(
+        "--fold_idx",
+        type=int,
+        default=0,
+        help="Index (0, num_folds-1) for which fold to use as validation set",
+    )
+
     args = parser.parse_args()
 
     cfg_from_yaml_file(args.cfg_file, cfg)
@@ -234,7 +247,7 @@ def main():
         lr_scheduler=lr_scheduler,
         optim_cfg=cfg.OPTIMIZATION,
         start_epoch=start_epoch,
-        total_epochs=1,
+        total_epochs=args.epochs,
         start_iter=it,
         rank=cfg.LOCAL_RANK,
         tb_log=tb_log,
@@ -269,7 +282,7 @@ def main():
     )
     eval_output_dir = output_dir / "eval" / "eval_with_train"
     eval_output_dir.mkdir(parents=True, exist_ok=True)
-    args.start_epoch = max(args.epochs - 10, 0)  # Only evaluate the last 10 epochs
+    args.start_epoch = max(args.epochs - 0, 0)  # Only evaluate the last 10 epochs
 
     repeat_eval_ckpt(
         model.module if dist_train else model,
